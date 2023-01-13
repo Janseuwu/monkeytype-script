@@ -1,4 +1,5 @@
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
@@ -9,7 +10,7 @@ import time
 def wait_for_jquery_to_finish(driver):
     WebDriverWait(driver, 10).until(lambda _: driver.execute_script("return window.jQuery.active") == 0)
 
-def type():
+def type(desiredWPM: int):
     # set options
     options = Options()
     options.binary_location = "/usr/bin/firefox"
@@ -45,7 +46,9 @@ def type():
             break
         except:
             pass
+
     def kill_me(driver): 
+        """ Function finding the text to type and typing it out """
         # focus the text part
         focusShit = driver.find_element(By.XPATH, "//*[@id='wordsWrapper']")
         focusShit.click()
@@ -60,11 +63,26 @@ def type():
         for word in childElements:
             beep.append(word.text)
         
-        actions = webdriver.ActionChains(driver)
         boop = ' '.join(beep)
-        actions.send_keys(boop)
-        actions.perform()   
-        time.sleep(1) 
+        charAmount = len(boop)
+        wordAmount = 1 # starts at 1 because there is 1 more word than spaces 
+        for word in boop:
+            if word == " ":
+                wordAmount += 1
+        expectedTime = wordAmount/desiredWPM
+        timeBetweenKeypresses = expectedTime/charAmount
+
+        actions = ActionChains(driver)
+        for char in boop:
+            actions.send_keys(char)
+            actions.pause(expectedTime)
+        actions.perform()
+        time.sleep(1)
+        print("word: ", boop)
+        print("amount of words: ", wordAmount)
+        print("amount of chars: ", charAmount)
+        print("expected time: ", expectedTime)
+        print("time between keypresses: ", timeBetweenKeypresses)
 
         try:
             goNext = driver.find_element(By.ID, "nextTestButton")
@@ -75,4 +93,4 @@ def type():
 
     kill_me(driver)
 if __name__ == "__main__":
-    type()
+    type(int(input("Desired WPM(leave empty for unlimited): ")))

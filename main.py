@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from pynput.keyboard import Key, Controller
 from selenium import webdriver
 import time
 
@@ -11,6 +12,9 @@ def wait_for_jquery_to_finish(driver):
     WebDriverWait(driver, 10).until(lambda _: driver.execute_script("return window.jQuery.active") == 0)
 
 def type(desiredWPM: int):
+    #TODO
+    # make program go brr if desiredWPM is empty
+
     # set options
     options = Options()
     options.binary_location = "/usr/bin/firefox"
@@ -48,7 +52,7 @@ def type(desiredWPM: int):
             pass
 
     def kill_me(driver): 
-        """ Function finding the text to type and typing it out """
+        """ Function for finding the text to type and typing it out """
         # focus the text part
         focusShit = driver.find_element(By.XPATH, "//*[@id='wordsWrapper']")
         focusShit.click()
@@ -62,28 +66,22 @@ def type(desiredWPM: int):
         beep = []
         for word in childElements:
             beep.append(word.text)
-        
-        boop = ' '.join(beep)
-        charAmount = len(boop)
-        wordAmount = 1 # starts at 1 because there is 1 more word than spaces 
-        for word in boop:
-            if word == " ":
-                wordAmount += 1
-        expectedTime = wordAmount/desiredWPM
-        timeBetweenKeypresses = expectedTime/charAmount
+        boop = " ".join(beep)
+        words = boop.split()
+        words_in_sentence = len(words)
+        desiredWPS = 60/desiredWPM
+        expectedTime = words_in_sentence/desiredWPM
 
-        actions = ActionChains(driver)
-        for char in boop:
-            actions.send_keys(char)
-            actions.pause(expectedTime)
-        actions.perform()
+        keyboard = Controller()
+        for word in words:
+            chars = word+" "
+            for char in chars:
+                keyboard.press(char)
+                keyboard.release(char)
+                time.sleep(desiredWPS/len(chars))
         time.sleep(1)
-        print("word: ", boop)
-        print("amount of words: ", wordAmount)
-        print("amount of chars: ", charAmount)
-        print("expected time: ", expectedTime)
-        print("time between keypresses: ", timeBetweenKeypresses)
-
+        
+        # clicks 'next' button and continues
         try:
             goNext = driver.find_element(By.ID, "nextTestButton")
             goNext.click()

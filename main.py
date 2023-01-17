@@ -11,7 +11,13 @@ import time
 def wait_for_jquery_to_finish(driver):
     WebDriverWait(driver, 10).until(lambda _: driver.execute_script("return window.jQuery.active") == 0)
 
-def type(desiredWPM: int):
+def typer(desiredWPM):
+    try:
+        if desiredWPM == "":
+            desiredWPM = 10**26
+        desiredWPM = int(desiredWPM)
+    except:
+        print("Must be a number dumbass what the fuck do you expect?")
     #TODO
     # make program go brr if desiredWPM is empty
 
@@ -52,7 +58,7 @@ def type(desiredWPM: int):
             pass
 
     def kill_me(driver): 
-        """ Function for finding the text to type and typing it out """
+        """ Function for finding the text to typer and typing it out """
         # focus the text part
         focusShit = driver.find_element(By.XPATH, "//*[@id='wordsWrapper']")
         focusShit.click()
@@ -91,4 +97,4 @@ def type(desiredWPM: int):
 
     kill_me(driver)
 if __name__ == "__main__":
-    type(int(input("Desired WPM(leave empty for unlimited): ")))
+    typer(input("Desired WPM(leave empty for unlimited): "))
